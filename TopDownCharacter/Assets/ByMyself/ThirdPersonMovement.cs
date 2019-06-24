@@ -12,6 +12,40 @@ public class ThirdPersonMovement : MonoBehaviour
 
     private Animator animator;
 
+    bool isAttacking = false;
+    bool isSprinting = false;
+
+    void Attack()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            isAttacking = true;
+            animator.SetTrigger("Attack");
+
+        }
+    }
+
+    public void AttackEnd()
+    {
+        isAttacking = false;
+    }
+
+    void Sprint()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            movementSpeed = 10f;
+            isSprinting = true;
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            movementSpeed = 3f;
+            isSprinting = false;
+            
+        }
+    }
+
 
     
     void Start()
@@ -22,24 +56,32 @@ public class ThirdPersonMovement : MonoBehaviour
     
     void Update()
     {
-        float Horizontal = Input.GetAxis("Horizontal");
-        float Vertical = Input.GetAxis("Vertical");
+        if (isAttacking == false) {
+            float Horizontal = Input.GetAxis("Horizontal");
+            float Vertical = Input.GetAxis("Vertical");
 
-        Vector3 movementDir = new Vector3(Horizontal, 0, Vertical);
-        movementDir = camera.transform.TransformDirection(movementDir);
-        movementDir.y = 0;
-        transform.position += movementDir * movementSpeed * Time.deltaTime;
+            Vector3 movementDir = new Vector3(Horizontal, 0, Vertical);
+            movementDir = camera.transform.TransformDirection(movementDir);
+            movementDir.y = 0;
+            transform.position += movementDir * movementSpeed * Time.deltaTime;
 
-        if (Horizontal != 0 || Vertical !=0)
-        {
-            Quaternion targetRotattion = Quaternion.LookRotation(movementDir);
-            transform.rotation = targetRotattion;
-
-            animator.SetBool("IsMoving", true);
+            if (Horizontal != 0 || Vertical != 0)
+            {
+                Quaternion targetRotattion = Quaternion.LookRotation(movementDir);
+                transform.rotation = targetRotattion;
+                float speed = movementDir.magnitude;
+                if (isSprinting == false && speed > 0.5f)
+                {
+                    speed = 0.5f;
+                }
+                animator.SetFloat("speed", speed);
+            }
+            
         }
-        else
-        {
-            animator.SetBool("IsMoving", false);
-        }
+
+        Attack();
+        Sprint();
+
+
     }
 }
